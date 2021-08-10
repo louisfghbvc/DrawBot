@@ -1,10 +1,8 @@
-from PIL import Image, ImageFilter
 from pynput.mouse import Controller, Button
 from PIL import Image, ImageFilter, UnidentifiedImageError 
 import time
 import sys
-import requests
-from io import BytesIO
+from urllib.request import urlopen
 import math
 
 mouse = Controller()
@@ -21,8 +19,7 @@ class DrawBot:
         self.pixelLinesToDraw = self.extractPixelLinesToDraw(pixelInterval, ignoreSoloPixels)
     
     def setUpImageToDraw(self, url, dither, desiredWidth, desiredHeight):
-        response = requests.get(url)
-        self.img = Image.open(BytesIO(response.content))
+        self.img = Image.open(urlopen(url))
         fillColor = (255,255,255)
         self.img = self.img.convert("RGBA")
         if self.img.mode in ('RGBA', 'LA'):
