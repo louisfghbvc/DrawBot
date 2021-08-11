@@ -1,9 +1,7 @@
 from pynput.mouse import Controller, Button
-from PIL import Image, ImageFilter, UnidentifiedImageError 
+from PIL import Image
 import time
-import sys
 from urllib.request import urlopen
-import math
 
 mouse = Controller()
 
@@ -31,6 +29,7 @@ class DrawBot:
         self.img.thumbnail(maxSize, Image.ANTIALIAS)
         self.width, self.height = self.img.size
         self.img = self.img.convert("RGB")
+        self.img.save('tmp.png')
 
     def setUpColorPalettes(self, colors):
         paletteColors = colors
@@ -109,9 +108,18 @@ class DrawBot:
                     self.drawLine(j)
             if self.speed == 0.1 or self.speed == 0.00001:
                 time.sleep(0.1)
+        # black
         if (0,0,0) in self.pixelLinesToDraw:
             self.changeColor(0, 0, 0)
             for j in self.pixelLinesToDraw[(0,0,0)]:
+                for i in j:
+                    if exit_event.is_set():
+                        break
+                    self.drawLine(j)
+        # white
+        if (255,255,255) in self.pixelLinesToDraw:
+            self.changeColor(255,255,255)
+            for j in self.pixelLinesToDraw[(255,255,255)]:
                 for i in j:
                     if exit_event.is_set():
                         break

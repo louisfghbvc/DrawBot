@@ -10,11 +10,13 @@ start = 0
 
 def getPalette(app):
     if app == 0:
-        app = "gartic"
+        app = "garticPhone"
     elif app == 1:
         app = "skribbl"
-    else:
+    elif app == 2:
         app = "paint"
+    else:
+        app = "gartic"
     coordinatesFile = os.path.dirname(os.path.abspath(__file__)) + "\\colorPalettes\\" + app + "Coordinates.txt"
     colorFiles = os.path.dirname(os.path.abspath(__file__)) + "\\colorPalettes\\" + app + "Colors.txt"
     coordinates = [tuple(int(i) for i in t.strip('()').split(',')) for t in open(coordinatesFile).read().split()]

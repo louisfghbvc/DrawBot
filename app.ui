@@ -224,7 +224,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QCheckBox" name="ditherBox_2">
+        <widget class="QCheckBox" name="ditherBox">
          <property name="text">
           <string>抖動</string>
          </property>
@@ -235,14 +235,14 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
-        <widget class="QCheckBox" name="ditherBox_3">
+        <widget class="QCheckBox" name="dfsBox">
          <property name="text">
           <string>深度畫法</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QCheckBox" name="ditherBox_5">
+        <widget class="QCheckBox" name="bfsBox">
          <property name="text">
           <string>廣度畫法</string>
          </property>
