@@ -448,7 +448,7 @@ class Ui_MainWindow(object):
     def drawWorker(self):
         try:
             draw = drawbot.DrawBot(self.width, self.height, self.startPosition, self.ignorePixels, self.dither, self.speed, self.pixelInterval, self.url, self.colors, self.coordinates)
-            draw.draw(self.exit_event)
+            draw.dfsDraw(self.exit_event)
         except Exception as error:
             print(error)
             self.errorLabel.setText("圖片開不瞭哦~換一張, Can not open img, please change it.")

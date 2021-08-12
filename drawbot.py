@@ -2,8 +2,11 @@ from pynput.mouse import Controller, Button
 from PIL import Image
 import time
 from urllib.request import urlopen
+from collections import defaultdict
+import sys
 
 mouse = Controller()
+sys.setrecursionlimit(10000)
 
 class DrawBot:
     def __init__(self, desiredWidth, desiredHeight, startPosition, ignoreSoloPixels, dither, speed, pixelInterval, url, colors, coordinates):
@@ -25,11 +28,8 @@ class DrawBot:
             background.paste(self.img, self.img.split()[-1])
             self.img = background
         self.img = self.img.convert("RGB").quantize(palette=self.palette, dither=dither)
-        maxSize = (desiredWidth, desiredHeight)
-        self.img.thumbnail(maxSize, Image.ANTIALIAS)
-        self.width, self.height = self.img.size
+        self.width, self.height = self.convertSize(desiredWidth, desiredHeight)
         self.img = self.img.convert("RGB")
-        self.img.save('tmp.png')
 
     def setUpColorPalettes(self, colors):
         paletteColors = colors
@@ -54,7 +54,33 @@ class DrawBot:
         if nbLinesHorizontal <= nbLinesVertical:
             return drawHorizontallyLines
         return drawVerticallyLines
-    
+
+    def dfsDraw(self, exit_event):
+        dir = [[-1, 0], [0, 1], [1, 0], [0, -1]]
+        self.width, self.height = self.height, self.width
+        vis = [[0 for j in range(self.width)] for j in range(self.height)]
+
+        def dfs(i, j, color):
+            if vis[i][j]: return
+            if exit_event.is_set(): return
+            vis[i][j] = 1
+            mouse.position = (i + self.startPosition[0], j + self.startPosition[1])
+            self.click()
+            for k in range(len(dir)):
+                ni, nj = i + dir[k][0], j + dir[k][1]
+                if ni < 0 or ni >= self.height or nj < 0 or nj >= self.width or vis[ni][nj] \
+                    or self.img.getpixel((ni, nj)) != color: continue
+                dfs(ni, nj, color)
+                time.sleep(0.1)
+            return
+
+        for i in range(0, self.height):
+            for j in range(0, self.width):
+                color = self.img.getpixel((i, j))
+                if exit_event.is_set(): return
+                self.changeColor(color[0], color[1], color[2])
+                dfs(i, j, color)
+
     def extractLinesToDraw(self, vertically, pixelInterval, ignoreSoloPixels):
         '''Get the lines to draw vertically or horizontally'''
         if not vertically:
@@ -63,7 +89,7 @@ class DrawBot:
         else:
             bound1 = self.width
             bound2 = self.height
-        lines = {}
+        lines = defaultdict(list)
         nbLinesToDraw = 0
         for i in range(0, bound1, pixelInterval):
             lineColor = None
@@ -80,8 +106,6 @@ class DrawBot:
                     lineColor = (r, g, b)
                     lineStart = currentPosition
                 elif lineColor != (r, g, b):
-                    if lineColor not in lines:
-                        lines[lineColor] = []
                     if (ignoreSoloPixels and lineStart != lineEnd) or not ignoreSoloPixels:
                         lines[lineColor].append([lineStart, lineEnd])
                     if lineColor != (255,255,255):
@@ -89,8 +113,6 @@ class DrawBot:
                     lineColor = (r, g, b)
                     lineStart = currentPosition
                 lineEnd = currentPosition
-            if lineColor not in lines:
-                lines[lineColor] = []
             if (ignoreSoloPixels and lineStart != lineEnd) or not ignoreSoloPixels:
                 lines[lineColor].append([lineStart, lineEnd])
             if lineColor != (255,255,255):
@@ -103,28 +125,18 @@ class DrawBot:
             if key != (255,255,255) and key != (0,0,0):
                 self.changeColor(key[0], key[1], key[2])
                 for j in value:
-                    if exit_event.is_set():
-                        break
+                    if exit_event.is_set(): break
                     self.drawLine(j)
+                
             if self.speed == 0.1 or self.speed == 0.00001:
                 time.sleep(0.1)
         # black
         if (0,0,0) in self.pixelLinesToDraw:
             self.changeColor(0, 0, 0)
             for j in self.pixelLinesToDraw[(0,0,0)]:
-                for i in j:
-                    if exit_event.is_set():
-                        break
-                    self.drawLine(j)
-        # white
-        if (255,255,255) in self.pixelLinesToDraw:
-            self.changeColor(255,255,255)
-            for j in self.pixelLinesToDraw[(255,255,255)]:
-                for i in j:
-                    if exit_event.is_set():
-                        break
-                    self.drawLine(j)
-
+                if exit_event.is_set(): break
+                self.drawLine(j)
+    
     def drawLine(self, coordinates):
         mouse.position = coordinates[0]
         mouse.press(Button.left)
@@ -154,8 +166,26 @@ class DrawBot:
             return 0.0000000000000001
         if speed == 4:
             return 0.0000000000000001
-
     
     def click(self):
         mouse.press(Button.left)
         mouse.release(Button.left)
+
+    def convertSize(self, desiredWidth, desiredHeight):
+        '''convert img to desiredWidth / desiredHeight keep aspect ratio'''
+        maxSize = (desiredWidth, desiredHeight)
+        if self.img.size[0] >= desiredWidth and self.img.size[1] >= desiredHeight:
+            self.img.thumbnail(maxSize, Image.ANTIALIAS)
+            return self.img.size
+        h_ratio = desiredHeight / self.img.size[1]
+        w_ratio = desiredWidth / self.img.size[0]
+        if int(self.img.size[0] * h_ratio) < desiredWidth:
+            maxSize = (int(self.img.size[0] * h_ratio), desiredHeight)
+            self.img = self.img.resize(maxSize, Image.ANTIALIAS)
+            return maxSize
+        elif int(self.img.size[1] * w_ratio) < desiredHeight:
+            maxSize = (desiredWidth, int(self.img.size[1] * w_ratio))
+            self.img = self.img.resize(maxSize, Image.ANTIALIAS)
+            return maxSize
+        self.img.thumbnail(maxSize, Image.ANTIALIAS)
+        return self.img.size
