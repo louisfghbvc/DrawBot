@@ -103,9 +103,9 @@ class Ui_MainWindow(object):
         self.dfsBox = QtWidgets.QCheckBox(self.verticalLayoutWidget)
         self.dfsBox.setObjectName("dfsBox")
         self.horizontalLayout_2.addWidget(self.dfsBox)
-        self.bfsBox = QtWidgets.QCheckBox(self.verticalLayoutWidget)
-        self.bfsBox.setObjectName("bfsBox")
-        self.horizontalLayout_2.addWidget(self.bfsBox)
+        self.edgeBox = QtWidgets.QCheckBox(self.verticalLayoutWidget)
+        self.edgeBox.setObjectName("edgeBox")
+        self.horizontalLayout_2.addWidget(self.edgeBox)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
         spacerItem5 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem5)
@@ -330,7 +330,7 @@ class Ui_MainWindow(object):
         self.ignorePixels = False
         self.dither = False
         self.isDfs = False
-        self.isBfs = False
+        self.isedge = False
         self.speed = 3
         self.pixelInterval = 5
         self.url = ""
@@ -342,7 +342,7 @@ class Ui_MainWindow(object):
         self.coordinateButton.clicked.connect(self.displayMouseCoordinates)
         self.setBoundsButton.clicked.connect(self.setBounds)
         self.ditherBox.clicked.connect(self.setDither)
-        self.bfsBox.clicked.connect(self.setBFS)
+        self.edgeBox.clicked.connect(self.setEdge)
         self.dfsBox.clicked.connect(self.setDFS)
         self.ignorePixelBox.clicked.connect(self.setIgnorePixel)
         self.speedSlider.valueChanged.connect(self.setSpeed)
@@ -372,10 +372,10 @@ class Ui_MainWindow(object):
         self.speedLabel.setText(_translate("MainWindow", "速度"))
         self.skippedPixelsLabel.setText(_translate("MainWindow", "忽略像素"))
         self.label_4.setText(_translate("MainWindow", "忽略像素越少，就越精確（但速度較慢）"))
-        self.ignorePixelBox.setText(_translate("MainWindow", "忽略單個像素"))
+        self.ignorePixelBox.setText(_translate("MainWindow", "忽略像素(忽略群大小)"))
         self.ditherBox.setText(_translate("MainWindow", "抖動"))
         self.dfsBox.setText(_translate("MainWindow", "深度畫法"))
-        self.bfsBox.setText(_translate("MainWindow", "廣度畫法"))
+        self.edgeBox.setText(_translate("MainWindow", "輪廓(僅深度畫法)"))
         self.coordinateButton.setText(_translate("MainWindow", "獲取鼠標坐標（下一次點擊）"))
         self.MouseCoordinateLabel.setText(_translate("MainWindow", "座標將顯示在此處"))
         self.setBoundsButton.setText(_translate("MainWindow", "設置繪圖寬度"))
@@ -404,8 +404,8 @@ class Ui_MainWindow(object):
     def setDither(self):
         self.dither = self.ditherBox.isChecked()
     
-    def setBFS(self):
-        self.isBfs = self.bfsBox.isChecked()
+    def setEdge(self):
+        self.edge = self.edgeBox.isChecked()
     
     def setDFS(self):
         self.isDfs = self.dfsBox.isChecked()
@@ -447,7 +447,7 @@ class Ui_MainWindow(object):
     
     def drawWorker(self):
         try:
-            draw = drawbot.DrawBot(self.width, self.height, self.startPosition, self.ignorePixels, self.dither, self.speed, self.pixelInterval, self.url, self.colors, self.coordinates, self.isDfs)
+            draw = drawbot.DrawBot(self.width, self.height, self.startPosition, self.ignorePixels, self.dither, self.speed, self.pixelInterval, self.url, self.colors, self.coordinates, self.isDfs, self.edge)
             draw.draw(self.exit_event)
         except Exception as error:
             print(error)
