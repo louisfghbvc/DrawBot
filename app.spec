@@ -3,9 +3,9 @@
 block_cipher = None
 
 
-a = Analysis(['app.py', 'drawbot.py', 'utils.py'],
-             pathex=['C:\\Users\\victo\\Documents\\code\\DrawBot'],
-             binaries=[('colorPalettes//', 'colorPalettes'), ('drawbot.ico', '.')],
+a = Analysis(['appv2.py', 'drawbot.py', 'utils.py'],
+             pathex=['C:\\Users\\ASUS\\Documents\\GitHub\\DrawBot'],
+             binaries=[('colorPalettes//', 'colorPalettes'), ('drawEX.ico', '.')],
              datas=[],
              hiddenimports=[],
              hookspath=[],
@@ -27,7 +27,7 @@ exe = EXE(pyz,
           strip=False,
           upx=True,
           console=False,
-          icon='drawbot.ico')
+          icon='drawEX.ico')
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
