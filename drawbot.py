@@ -74,7 +74,6 @@ class DrawBot:
                 time.sleep(self.speedByPixel)
                 todo += [(i+self.pixelInterval,j), (i-self.pixelInterval,j), (i,j+self.pixelInterval), (i,j-self.pixelInterval)]
 
-        self.data = np.zeros((self.height, self.width, 3), np.uint8)
         for i in range(0, self.height, self.pixelInterval):
             for j in range(0, self.width, self.pixelInterval):
                 if vis[i][j]: continue
