@@ -17,7 +17,7 @@ import threading
 try:
     # Include in try/except block if you're also targeting Mac/Linux
     from PyQt5.QtWinExtras import QtWin
-    myappid = 'v2f.drawbot.1'
+    myappid = 'louisfghbvc.drawbot.1'
     QtWin.setCurrentProcessExplicitAppUserModelID(myappid)
 except ImportError:
     pass
@@ -362,6 +362,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "DrawBot"))
+        MainWindow.setWindowIcon(QtGui.QIcon('drawEX.ico'))
         self.title.setText(_translate("MainWindow", "DrawBot - @尾玉"))
         self.urlTextBox.setPlaceholderText(_translate("MainWindow", "要繪製的圖像的 URL"))
         self.appLabel.setText(_translate("MainWindow", "選擇遊戲平台"))
@@ -451,7 +452,7 @@ class Ui_MainWindow(object):
             draw.draw(self.exit_event)
         except Exception as error:
             print(error)
-            self.errorLabel.setText("圖片開不瞭哦~換一張, Can not open img, please change it.")
+            self.errorLabel.setText(error)
             pass
         self.drawingThread = None
 
