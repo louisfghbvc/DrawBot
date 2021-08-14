@@ -3,15 +3,18 @@ from PIL import Image
 import time
 from urllib.request import urlopen
 from collections import defaultdict
-import sys
+import numpy as np
 
 mouse = Controller()
-sys.setrecursionlimit(10000)
+
 
 class DrawBot:
-    def __init__(self, desiredWidth, desiredHeight, startPosition, ignoreSoloPixels, dither, speed, pixelInterval, url, colors, coordinates):
+    def __init__(self, desiredWidth, desiredHeight, startPosition, ignoreSoloPixels, dither, speed, pixelInterval, url, colors, coordinates, isDfs):
         self.colorCoordinates = coordinates
         self.colors = colors
+        self.ignoreSoloPixels = ignoreSoloPixels
+        self.pixelInterval = pixelInterval
+        self.isDfs = isDfs
         self.speed = self.convertSpeed(speed)
         self.speedByPixel = self.convertSpeedByPixel(speed)
         self.startPosition = startPosition
@@ -56,30 +59,43 @@ class DrawBot:
         return drawVerticallyLines
 
     def dfsDraw(self, exit_event):
-        dir = [[-1, 0], [0, 1], [1, 0], [0, -1]]
-        self.width, self.height = self.height, self.width
-        vis = [[0 for j in range(self.width)] for j in range(self.height)]
+        vis = np.zeros((self.height, self.width))
 
         def dfs(i, j, color):
-            if vis[i][j]: return
-            if exit_event.is_set(): return
-            vis[i][j] = 1
-            mouse.position = (i + self.startPosition[0], j + self.startPosition[1])
-            self.click()
-            for k in range(len(dir)):
-                ni, nj = i + dir[k][0], j + dir[k][1]
-                if ni < 0 or ni >= self.height or nj < 0 or nj >= self.width or vis[ni][nj] \
-                    or self.img.getpixel((ni, nj)) != color: continue
-                dfs(ni, nj, color)
-                time.sleep(0.1)
-            return
+            todo = [(i, j)]
+            while todo:
+                if exit_event.is_set(): return
+                i, j = todo.pop()
+                if not (0 <= i < self.height) or not (0 <= j < self.width) or vis[i][j] or color != self.img.getpixel((j, i)): continue
+                vis[i][j] = 1
+                mouse.position = (j + self.startPosition[0], i + self.startPosition[1])
+                time.sleep(self.speedByPixel)
+                self.click()
+                time.sleep(self.speedByPixel)
+                todo += [(i+self.pixelInterval,j), (i-self.pixelInterval,j), (i,j+self.pixelInterval), (i,j-self.pixelInterval)]
 
-        for i in range(0, self.height):
-            for j in range(0, self.width):
-                color = self.img.getpixel((i, j))
+        self.data = np.zeros((self.height, self.width, 3), np.uint8)
+        for i in range(0, self.height, self.pixelInterval):
+            for j in range(0, self.width, self.pixelInterval):
+                if vis[i][j]: continue
+                color = self.img.getpixel((j, i))
+                if color == (255,255,255) or color == (0,0,0): continue
                 if exit_event.is_set(): return
                 self.changeColor(color[0], color[1], color[2])
                 dfs(i, j, color)
+                if self.speed == 0.1 or self.speed == 0.00001:
+                    time.sleep(0.1)
+        # black
+        for i in range(0, self.height, self.pixelInterval):
+            for j in range(0, self.width, self.pixelInterval):
+                if vis[i][j]: continue
+                color = self.img.getpixel((j, i))
+                if color != (0,0,0): continue
+                if exit_event.is_set(): return
+                self.changeColor(color[0], color[1], color[2])
+                dfs(i, j, color)
+                if self.speed == 0.1 or self.speed == 0.00001:
+                    time.sleep(0.1)
 
     def extractLinesToDraw(self, vertically, pixelInterval, ignoreSoloPixels):
         '''Get the lines to draw vertically or horizontally'''
@@ -121,6 +137,10 @@ class DrawBot:
         return [lines, nbLinesToDraw]
     
     def draw(self, exit_event):
+        if self.isDfs:
+            self.dfsDraw(exit_event)
+            return
+
         for key, value in self.pixelLinesToDraw.items():
             if key != (255,255,255) and key != (0,0,0):
                 self.changeColor(key[0], key[1], key[2])

@@ -342,8 +342,8 @@ class Ui_MainWindow(object):
         self.coordinateButton.clicked.connect(self.displayMouseCoordinates)
         self.setBoundsButton.clicked.connect(self.setBounds)
         self.ditherBox.clicked.connect(self.setDither)
-        self.dfsBox.clicked.connect(self.setBFS)
-        self.bfsBox.clicked.connect(self.setDFS)
+        self.bfsBox.clicked.connect(self.setBFS)
+        self.dfsBox.clicked.connect(self.setDFS)
         self.ignorePixelBox.clicked.connect(self.setIgnorePixel)
         self.speedSlider.valueChanged.connect(self.setSpeed)
         self.skippedPixelSlider.valueChanged.connect(self.setPixelInterval)
@@ -447,8 +447,8 @@ class Ui_MainWindow(object):
     
     def drawWorker(self):
         try:
-            draw = drawbot.DrawBot(self.width, self.height, self.startPosition, self.ignorePixels, self.dither, self.speed, self.pixelInterval, self.url, self.colors, self.coordinates)
-            draw.dfsDraw(self.exit_event)
+            draw = drawbot.DrawBot(self.width, self.height, self.startPosition, self.ignorePixels, self.dither, self.speed, self.pixelInterval, self.url, self.colors, self.coordinates, self.isDfs)
+            draw.draw(self.exit_event)
         except Exception as error:
             print(error)
             self.errorLabel.setText("圖片開不瞭哦~換一張, Can not open img, please change it.")
