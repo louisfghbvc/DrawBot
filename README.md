@@ -19,10 +19,9 @@ Watch that video and the bot will have no secrets for you:
 https://youtu.be/bdCBftJV25s
 
 
-## My version (Ongoing)
+## My version (Done)
 
 - chinese version
 - fix some url img error
 - resize img more powerful
-- BFS or DFS draw
-- convert to gray image
+- DFS draw & add edge draw
