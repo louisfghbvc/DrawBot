@@ -1,5 +1,5 @@
 from pynput.mouse import Controller, Button
-from PIL import Image, ImageFilter
+from PIL import Image
 import time
 from urllib.request import urlopen, Request
 from collections import defaultdict
