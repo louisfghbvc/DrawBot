@@ -330,7 +330,7 @@ class Ui_MainWindow(object):
         self.ignorePixels = False
         self.dither = False
         self.isDfs = False
-        self.isedge = False
+        self.isEdge = False
         self.speed = 3
         self.pixelInterval = 5
         self.url = ""
@@ -375,8 +375,8 @@ class Ui_MainWindow(object):
         self.label_4.setText(_translate("MainWindow", "忽略像素越少，就越精確（但速度較慢）"))
         self.ignorePixelBox.setText(_translate("MainWindow", "忽略像素(忽略群大小)"))
         self.ditherBox.setText(_translate("MainWindow", "抖動"))
-        self.dfsBox.setText(_translate("MainWindow", "深度畫法"))
-        self.edgeBox.setText(_translate("MainWindow", "輪廓(僅深度畫法)"))
+        self.dfsBox.setText(_translate("MainWindow", "方位畫法"))
+        self.edgeBox.setText(_translate("MainWindow", "方位畫法(速)"))
         self.coordinateButton.setText(_translate("MainWindow", "獲取鼠標坐標（下一次點擊）"))
         self.MouseCoordinateLabel.setText(_translate("MainWindow", "座標將顯示在此處"))
         self.setBoundsButton.setText(_translate("MainWindow", "設置繪圖寬度"))
@@ -406,7 +406,7 @@ class Ui_MainWindow(object):
         self.dither = self.ditherBox.isChecked()
     
     def setEdge(self):
-        self.edge = self.edgeBox.isChecked()
+        self.isEdge = self.edgeBox.isChecked()
     
     def setDFS(self):
         self.isDfs = self.dfsBox.isChecked()
@@ -448,7 +448,7 @@ class Ui_MainWindow(object):
     
     def drawWorker(self):
         try:
-            draw = drawbot.DrawBot(self.width, self.height, self.startPosition, self.ignorePixels, self.dither, self.speed, self.pixelInterval, self.url, self.colors, self.coordinates, self.isDfs, self.edge)
+            draw = drawbot.DrawBot(self.width, self.height, self.startPosition, self.ignorePixels, self.dither, self.speed, self.pixelInterval, self.url, self.colors, self.coordinates, self.isDfs, self.isEdge)
             draw.draw(self.exit_event)
         except Exception as error:
             print(error)

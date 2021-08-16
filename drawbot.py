@@ -1,3 +1,4 @@
+from sys import base_exec_prefix
 from pynput.mouse import Controller, Button
 from PIL import Image
 import time
@@ -61,7 +62,7 @@ class DrawBot:
             return drawHorizontallyLines
         return drawVerticallyLines
 
-    def getEdges(self, points, remainOrder = True):
+    def getEdges(self, points, remainOrder = False):
         '''get img edge by each components, remain origin order'''
         ans = set()
         # first by h, second by w
@@ -87,7 +88,8 @@ class DrawBot:
         while todo and level >= 0:
             if exit_event.is_set(): return
             i, j = todo.pop()
-            nxt = [(i+self.pixelInterval,j), (i-self.pixelInterval,j), (i,j+self.pixelInterval), (i,j-self.pixelInterval)]
+            nxt = [(i+self.pixelInterval,j), (i-self.pixelInterval,j), (i,j+self.pixelInterval), (i,j-self.pixelInterval),
+            (i+self.pixelInterval,j+self.pixelInterval), (i+self.pixelInterval,j-self.pixelInterval), (i-self.pixelInterval,j+self.pixelInterval), (i-self.pixelInterval,j-self.pixelInterval)]
             for ni, nj in nxt:
                 if not (0 <= ni < self.height) or not (0 <= nj < self.width) or self.vis[ni][nj] or color != self.img.getpixel((nj, ni)): continue
                 if level == 0: return True
@@ -96,15 +98,34 @@ class DrawBot:
         return False
 
     def drawPerPixel(self, i, j):
+        old_pos = mouse.position
         mouse.position = (j + self.startPosition[0], i + self.startPosition[1])
-        time.sleep(self.speedByPixel)
+        if abs(mouse.position[0] - old_pos[0]) > self.pixelInterval or abs(mouse.position[1] - old_pos[1]) > self.pixelInterval:
+            time.sleep(self.speed)
+        else:
+            time.sleep(self.speedByPixel)
         self.click()
         time.sleep(self.speedByPixel)
-    
+
     def drawPixels(self, points, exit_event):
         for i, j in points:
-            if exit_event.is_set(): return
+            if exit_event.is_set(): break
             self.drawPerPixel(i, j)
+    
+    def drawPixelContinous(self, x, y):
+        '''use mouse move'''
+        mouse.press(Button.left)
+        time.sleep(self.speedByPixel)
+        mouse.move(y + self.startPosition[0] - mouse.position[0], x + self.startPosition[1] - mouse.position[1])
+        time.sleep(self.speedByPixel)
+        mouse.release(Button.left)
+
+    def drawPixelsContinous(self, points, exit_event):
+        '''draw edge faster'''
+        mouse.position = (points[0][1] + self.startPosition[0], points[0][0] + self.startPosition[1])
+        for x, y in points[1:]:
+            if exit_event.is_set(): break
+            self.drawPixelContinous(x, y)
 
     def dfs(self, i, j, color, exit_event, drawing = True):
         '''traversal with same color'''
@@ -117,7 +138,8 @@ class DrawBot:
             self.vis[i][j] = 1
             callback.append((i, j))
             if drawing: self.drawPerPixel(i, j)
-            todo += [(i+self.pixelInterval,j), (i-self.pixelInterval,j), (i,j+self.pixelInterval), (i,j-self.pixelInterval)]
+            todo += [(i+self.pixelInterval,j), (i-self.pixelInterval,j), (i,j+self.pixelInterval), (i,j-self.pixelInterval),
+            (i+self.pixelInterval,j+self.pixelInterval), (i+self.pixelInterval,j-self.pixelInterval), (i-self.pixelInterval,j+self.pixelInterval), (i-self.pixelInterval,j-self.pixelInterval)]
         return callback
 
     def dfsDraw(self, exit_event):
@@ -131,7 +153,7 @@ class DrawBot:
                 if self.isEdge:
                     points = self.dfs(i, j, color, exit_event, drawing=False)
                     points = self.getEdges(points)
-                    self.drawPixels(points, exit_event)
+                    self.drawPixelsContinous(points, exit_event)
                 else:
                     self.dfs(i, j, color, exit_event, drawing=True)
                 time.sleep(self.speedByPixel)
@@ -191,7 +213,7 @@ class DrawBot:
         return [lines, nbLinesToDraw]
     
     def draw(self, exit_event):
-        if self.isDfs:
+        if self.isDfs or self.isEdge:
             self.dfsDraw(exit_event)
             return
 
