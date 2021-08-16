@@ -12,7 +12,7 @@ class DrawBot:
     def __init__(self, desiredWidth, desiredHeight, startPosition, 
                 ignoreSoloPixels, dither, speed, 
                 pixelInterval, url, colors, 
-                coordinates, isDfs, isEdge, isEdgeEX):
+                coordinates, isDfs, isEdge, isEdgeEX, isGray):
         self.colorCoordinates = coordinates
         self.colors = colors
         self.ignoreSoloPixels = ignoreSoloPixels
@@ -20,6 +20,7 @@ class DrawBot:
         self.isDfs = isDfs
         self.isEdge = isEdge
         self.isEdgeEX = isEdgeEX
+        self.isGray = isGray
         self.speed = self.convertSpeed(speed)
         self.speedByPixel = self.convertSpeedByPixel(speed)
         self.startPosition = startPosition
@@ -58,6 +59,8 @@ class DrawBot:
                 break
         if found:
             self.click()
+        else:
+            raise ValueError("Not Find Color! Need Check rgb txt is correct or not")
 
     def extractPixelLinesToDraw(self, pixelInterval, ignoreSoloPixels):
         drawVerticallyLines, nbLinesVertical = self.extractLinesToDraw(True, pixelInterval, ignoreSoloPixels)
@@ -225,7 +228,7 @@ class DrawBot:
             if key != (255,255,255) and key != (0,0,0):
                 self.changeColor(key[0], key[1], key[2])
                 for j in value:
-                    if exit_event.is_set(): break
+                    if exit_event.is_set(): return
                     self.drawLine(j)
                 
             if self.speed == 0.1 or self.speed == 0.00001:

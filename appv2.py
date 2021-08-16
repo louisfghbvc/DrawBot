@@ -338,6 +338,7 @@ class Ui_MainWindow(object):
         self.isDfs = False
         self.isEdge = False
         self.isEdgeEX = False
+        self.isGray = False
         self.speed = 3
         self.pixelInterval = 5
         self.url = ""
@@ -358,6 +359,7 @@ class Ui_MainWindow(object):
         self.appBox.currentIndexChanged.connect(self.setApp)
         self.urlTextBox.textChanged.connect(self.setUrl)
         self.drawButton.clicked.connect(self.draw)
+        self.grayBox.clicked.connect(self.setGray)
 
         # Collect keyboard events
         listener = Listener(
@@ -422,6 +424,9 @@ class Ui_MainWindow(object):
     def setEdgeEX(self):
         self.isEdgeEX = self.edgeEXBox.isChecked()
     
+    def setGray(self):
+        self.isGray = self.grayBox.isChecked()
+    
     def setDFS(self):
         self.isDfs = self.dfsBox.isChecked()
 
@@ -462,7 +467,10 @@ class Ui_MainWindow(object):
     
     def drawWorker(self):
         try:
-            draw = drawbot.DrawBot(self.width, self.height, self.startPosition, self.ignorePixels, self.dither, self.speed, self.pixelInterval, self.url, self.colors, self.coordinates, self.isDfs, self.isEdge, self.isEdgeEX)
+            draw = drawbot.DrawBot(self.width, self.height, self.startPosition, 
+                    self.ignorePixels, self.dither, self.speed, self.pixelInterval, 
+                    self.url, self.colors, self.coordinates, self.isDfs, 
+                    self.isEdge, self.isEdgeEX, self.isGray)
             draw.draw(self.exit_event)
         except Exception as error:
             print(error)
