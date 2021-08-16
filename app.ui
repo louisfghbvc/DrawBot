@@ -219,7 +219,14 @@
        <item>
         <widget class="QCheckBox" name="ignorePixelBox">
          <property name="text">
-          <string>忽略單個像素</string>
+          <string>忽略單像素(忽略群大小)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="grayBox">
+         <property name="text">
+          <string>灰階</string>
          </property>
         </widget>
        </item>
@@ -237,14 +244,21 @@
        <item>
         <widget class="QCheckBox" name="dfsBox">
          <property name="text">
-          <string>深度畫法</string>
+          <string>方位畫法</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QCheckBox" name="bfsBox">
+        <widget class="QCheckBox" name="edgeBox">
          <property name="text">
-          <string>廣度畫法</string>
+          <string>輪廓畫法</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="edgeEXBox">
+         <property name="text">
+          <string>輪廓畫法+</string>
          </property>
         </widget>
        </item>

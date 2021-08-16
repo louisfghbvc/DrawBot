@@ -9,13 +9,17 @@ import numpy as np
 mouse = Controller()
 
 class DrawBot:
-    def __init__(self, desiredWidth, desiredHeight, startPosition, ignoreSoloPixels, dither, speed, pixelInterval, url, colors, coordinates, isDfs, isEdge):
+    def __init__(self, desiredWidth, desiredHeight, startPosition, 
+                ignoreSoloPixels, dither, speed, 
+                pixelInterval, url, colors, 
+                coordinates, isDfs, isEdge, isEdgeEX):
         self.colorCoordinates = coordinates
         self.colors = colors
         self.ignoreSoloPixels = ignoreSoloPixels
         self.pixelInterval = pixelInterval
         self.isDfs = isDfs
         self.isEdge = isEdge
+        self.isEdgeEX = isEdgeEX
         self.speed = self.convertSpeed(speed)
         self.speedByPixel = self.convertSpeedByPixel(speed)
         self.startPosition = startPosition
@@ -62,8 +66,8 @@ class DrawBot:
             return drawHorizontallyLines
         return drawVerticallyLines
 
-    def getEdges(self, points, remainOrder = False):
-        '''get img edge by each components, remain origin order'''
+    def getEdges(self, points):
+        '''get img edge by each components, remain origin order or not'''
         ans = set()
         # first by h, second by w
         for turn in range(2):
@@ -80,7 +84,7 @@ class DrawBot:
                     mn_point = (each_mn[v], v) if turn else (v, each_mn[v])
                     ans.add(mx_point)
                     ans.add(mn_point)
-        return list(filter(lambda e: e in ans, points)) if remainOrder else list(ans)
+        return list(ans) if self.isEdgeEX else list(filter(lambda e: e in ans, points))
 
     def test_levelPixels(self, i, j, color, exit_event, level):
         '''test img have enough pixels to draw'''
@@ -150,7 +154,7 @@ class DrawBot:
                 if self.vis[i][j] or color == (255,255,255) or color == (0,0,0) : continue
                 if self.ignoreSoloPixels and not self.test_levelPixels(i, j, color, exit_event, self.pixelInterval): continue
                 self.changeColor(color[0], color[1], color[2])
-                if self.isEdge:
+                if self.isEdge or self.isEdgeEX:
                     points = self.dfs(i, j, color, exit_event, drawing=False)
                     points = self.getEdges(points)
                     self.drawPixelsContinous(points, exit_event)
@@ -165,10 +169,10 @@ class DrawBot:
                 if self.vis[i][j] or color != (0,0,0) : continue
                 if self.ignoreSoloPixels and not self.test_levelPixels(i, j, color, exit_event, self.pixelInterval): continue
                 self.changeColor(color[0], color[1], color[2])
-                if self.isEdge:
+                if self.isEdge or self.isEdgeEX:
                     points = self.dfs(i, j, color, exit_event, drawing=False)
                     points = self.getEdges(points)
-                    self.drawPixels(points, exit_event)
+                    self.drawPixelsContinous(points, exit_event)
                 else:
                     self.dfs(i, j, color, exit_event, drawing=True)
                 time.sleep(self.speedByPixel)
@@ -213,7 +217,7 @@ class DrawBot:
         return [lines, nbLinesToDraw]
     
     def draw(self, exit_event):
-        if self.isDfs or self.isEdge:
+        if self.isDfs or self.isEdge or self.isEdgeEX:
             self.dfsDraw(exit_event)
             return
 
@@ -277,11 +281,11 @@ class DrawBot:
         w_ratio = desiredWidth / self.img.size[0]
         if int(self.img.size[0] * h_ratio) < desiredWidth:
             maxSize = (int(self.img.size[0] * h_ratio), desiredHeight)
-            self.img = self.img.resize(maxSize, Image.ANTIALIAS)
+            self.img = self.img.resize(maxSize, Image.BICUBIC)
             return maxSize
         elif int(self.img.size[1] * w_ratio) < desiredHeight:
             maxSize = (desiredWidth, int(self.img.size[1] * w_ratio))
-            self.img = self.img.resize(maxSize, Image.ANTIALIAS)
+            self.img = self.img.resize(maxSize, Image.BICUBIC)
             return maxSize
         self.img.thumbnail(maxSize, Image.ANTIALIAS)
         return self.img.size

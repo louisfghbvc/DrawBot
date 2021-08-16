@@ -94,6 +94,9 @@ class Ui_MainWindow(object):
         self.ignorePixelBox = QtWidgets.QCheckBox(self.verticalLayoutWidget)
         self.ignorePixelBox.setObjectName("ignorePixelBox")
         self.horizontalLayout.addWidget(self.ignorePixelBox)
+        self.grayBox = QtWidgets.QCheckBox(self.verticalLayoutWidget)
+        self.grayBox.setObjectName("grayBox")
+        self.horizontalLayout.addWidget(self.grayBox)
         self.ditherBox = QtWidgets.QCheckBox(self.verticalLayoutWidget)
         self.ditherBox.setObjectName("ditherBox")
         self.horizontalLayout.addWidget(self.ditherBox)
@@ -106,6 +109,9 @@ class Ui_MainWindow(object):
         self.edgeBox = QtWidgets.QCheckBox(self.verticalLayoutWidget)
         self.edgeBox.setObjectName("edgeBox")
         self.horizontalLayout_2.addWidget(self.edgeBox)
+        self.edgeEXBox = QtWidgets.QCheckBox(self.verticalLayoutWidget)
+        self.edgeEXBox.setObjectName("edgeEXBox")
+        self.horizontalLayout_2.addWidget(self.edgeEXBox)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
         spacerItem5 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem5)
@@ -331,6 +337,7 @@ class Ui_MainWindow(object):
         self.dither = False
         self.isDfs = False
         self.isEdge = False
+        self.isEdgeEX = False
         self.speed = 3
         self.pixelInterval = 5
         self.url = ""
@@ -343,6 +350,7 @@ class Ui_MainWindow(object):
         self.setBoundsButton.clicked.connect(self.setBounds)
         self.ditherBox.clicked.connect(self.setDither)
         self.edgeBox.clicked.connect(self.setEdge)
+        self.edgeEXBox.clicked.connect(self.setEdgeEX)
         self.dfsBox.clicked.connect(self.setDFS)
         self.ignorePixelBox.clicked.connect(self.setIgnorePixel)
         self.speedSlider.valueChanged.connect(self.setSpeed)
@@ -355,6 +363,7 @@ class Ui_MainWindow(object):
         listener = Listener(
             on_press=self.on_press)
         listener.start()
+
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -373,10 +382,12 @@ class Ui_MainWindow(object):
         self.speedLabel.setText(_translate("MainWindow", "速度"))
         self.skippedPixelsLabel.setText(_translate("MainWindow", "忽略像素"))
         self.label_4.setText(_translate("MainWindow", "忽略像素越少，就越精確（但速度較慢）"))
-        self.ignorePixelBox.setText(_translate("MainWindow", "忽略像素(忽略群大小)"))
+        self.ignorePixelBox.setText(_translate("MainWindow", "忽略單像素(忽略群大小)"))
+        self.grayBox.setText(_translate("MainWindow", "灰階"))
         self.ditherBox.setText(_translate("MainWindow", "抖動"))
         self.dfsBox.setText(_translate("MainWindow", "方位畫法"))
-        self.edgeBox.setText(_translate("MainWindow", "方位畫法(速)"))
+        self.edgeBox.setText(_translate("MainWindow", "輪廓畫法"))
+        self.edgeEXBox.setText(_translate("MainWindow", "輪廓畫法+"))
         self.coordinateButton.setText(_translate("MainWindow", "獲取鼠標坐標（下一次點擊）"))
         self.MouseCoordinateLabel.setText(_translate("MainWindow", "座標將顯示在此處"))
         self.setBoundsButton.setText(_translate("MainWindow", "設置繪圖寬度"))
@@ -407,6 +418,9 @@ class Ui_MainWindow(object):
     
     def setEdge(self):
         self.isEdge = self.edgeBox.isChecked()
+    
+    def setEdgeEX(self):
+        self.isEdgeEX = self.edgeEXBox.isChecked()
     
     def setDFS(self):
         self.isDfs = self.dfsBox.isChecked()
@@ -448,11 +462,11 @@ class Ui_MainWindow(object):
     
     def drawWorker(self):
         try:
-            draw = drawbot.DrawBot(self.width, self.height, self.startPosition, self.ignorePixels, self.dither, self.speed, self.pixelInterval, self.url, self.colors, self.coordinates, self.isDfs, self.isEdge)
+            draw = drawbot.DrawBot(self.width, self.height, self.startPosition, self.ignorePixels, self.dither, self.speed, self.pixelInterval, self.url, self.colors, self.coordinates, self.isDfs, self.isEdge, self.isEdgeEX)
             draw.draw(self.exit_event)
         except Exception as error:
             print(error)
-            self.errorLabel.setText(error)
+            self.errorLabel.setText(str(error))
             pass
         self.drawingThread = None
 
