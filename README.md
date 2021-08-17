@@ -6,7 +6,7 @@ DrawBot is a software made by [V2F](https://youtube.com/user/IV2FI), which will 
 
 ## Where can I download it?
 
-Over here, the .zip file: https://github.com/IV2FI/DrawBot/releases
+Over here, the .zip file: [Here](https://github.com/louisfghbvc/DrawBot/release)
 
 **Before downloading, please watch the video below to understand how set up everything! Thanks**
 
