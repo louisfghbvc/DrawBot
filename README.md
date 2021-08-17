@@ -24,4 +24,8 @@ https://youtu.be/bdCBftJV25s
 - chinese version
 - fix some url img error
 - resize img more powerful
-- DFS draw & add edge draw
+- fix single color
+- DFS draw & add edge draw & edge faster draw
+
+- Cool edge draw faster demo
+- ![gartic phone demo_ fastest](https://user-images.githubusercontent.com/43661591/129753921-276404df-1acd-4893-8825-9921b24ef0cf.gif)
