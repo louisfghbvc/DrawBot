@@ -463,7 +463,7 @@ class Ui_MainWindow(object):
             if self.url == "":
                 self.errorLabel.setText("請輸入url, please enter url:")
             elif self.width == 0:
-                self.errorLabel.setText("請輸入url, please enter url:")
+                self.errorLabel.setText("請選擇畫畫的範圍")
     
     def drawWorker(self):
         try:

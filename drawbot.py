@@ -51,6 +51,7 @@ class DrawBot:
         self.palette.putpalette(paletteColors)
     
     def changeColor(self, r, g, b):
+        if self.isGray: return
         found = False
         for i in range(0, len(self.colors), 3):
             if r == self.colors[i] and g == self.colors[i+1] and b == self.colors[i+2]:
