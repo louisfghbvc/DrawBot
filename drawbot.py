@@ -5,14 +5,27 @@ import time
 from urllib.request import urlopen, Request
 from collections import defaultdict
 import numpy as np
+from quickdraw_wrapper import quickDrawWrapper
 
 mouse = Controller()
 
 class DrawBot:
-    def __init__(self, desiredWidth, desiredHeight, startPosition, 
-                ignoreSoloPixels, dither, speed, 
-                pixelInterval, url, colors, 
-                coordinates, isDfs, isEdge, isEdgeEX, isGray):
+    def __init__(self, 
+                desiredWidth, 
+                desiredHeight, 
+                startPosition, 
+                ignoreSoloPixels, 
+                dither, 
+                speed, 
+                pixelInterval, 
+                url, 
+                colors, 
+                coordinates, 
+                isDfs, 
+                isEdge, 
+                isEdgeEX, 
+                isGray):
+
         self.colorCoordinates = coordinates
         self.colors = colors
         self.ignoreSoloPixels = ignoreSoloPixels
@@ -24,12 +37,21 @@ class DrawBot:
         self.speed = self.convertSpeed(speed)
         self.speedByPixel = self.convertSpeedByPixel(speed)
         self.startPosition = startPosition
+        self.ChineseName = ""
+        self.qd = quickDrawWrapper()
+        
         self.setUpColorPalettes(colors)
         self.setUpImageToDraw(url, dither, desiredWidth, desiredHeight)
-        self.pixelLinesToDraw = self.extractPixelLinesToDraw(pixelInterval, ignoreSoloPixels)
-        self.vis = np.zeros((self.height, self.width))
-    
+
+        if self.ChineseName == "":
+            self.vis = np.zeros((self.height, self.width))
+            self.pixelLinesToDraw = self.extractPixelLinesToDraw(pixelInterval, ignoreSoloPixels)
+
     def setUpImageToDraw(self, url, dither, desiredWidth, desiredHeight):
+        if url in self.qd.mName:
+            self.ChineseName = url
+            return
+
         headers = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0'}
         req = Request(url=url, headers=headers)
         self.img = Image.open(urlopen(req))
@@ -135,7 +157,7 @@ class DrawBot:
             if exit_event.is_set(): break
             self.drawPixelContinous(x, y)
 
-    def dfs(self, i, j, color, exit_event, drawing = True):
+    def dfs(self, i, j, color, exit_event, drawing=True):
         '''traversal with same color'''
         callback = []
         todo = [(i, j)]
@@ -221,6 +243,10 @@ class DrawBot:
         return [lines, nbLinesToDraw]
     
     def draw(self, exit_event):
+        if self.ChineseName != "":
+            self.drawQuick(name=self.ChineseName, exit_event=exit_event)
+            return
+
         if self.isDfs or self.isEdge or self.isEdgeEX:
             self.dfsDraw(exit_event)
             return
@@ -241,6 +267,14 @@ class DrawBot:
                 if exit_event.is_set(): break
                 self.drawLine(j)
     
+    def drawQuick(self, name, exit_event):
+        strokes = self.qd.getDrawPosition(name)
+        if strokes is None:
+            raise ValueError("Not found this name! Change it!")
+        for stroke in strokes:
+            stroke = [(y, x) for x , y in stroke]
+            self.drawPixelsContinous(stroke, exit_event)
+
     def drawLine(self, coordinates):
         mouse.position = coordinates[0]
         mouse.press(Button.left)
